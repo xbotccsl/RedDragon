@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imesh HTML Editor</title>
+    <!-- Use Tailwind CSS for a clean and responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+        .message-box {
+            display: none;
+        }
+        /* Custom scrollbar for the textarea */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 4px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background-color: #6b7280;
+        }
+        /* Style the iframe to fit its container */
+        iframe {
+            width: 100%;
+            height: 100%;
+        }
+        .suggestions {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .suggestion-item:hover {
+            background-color: #4b5563;
+            cursor: pointer;
+        }
+        /* Custom styling for the window-like container */
+        .window {
+            background-color: #cbd5e1;
+            border: 1px solid #94a3b8;
+        }
+        .title-bar {
+            background-color: #94a3b8;
+            height: 30px;
+            border-bottom: 1px solid #64748b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+        }
+        .title-bar-text {
+            font-weight: bold;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .title-bar-controls {
+            display: flex;
+            gap: 4px;
+        }
+        .control-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 h-screen flex flex-col p-4 md:p-8">
+
+    <header class="mb-6 text-center">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-white">Imesh HTML Editor</h1>
+    </header>
+
+    <main class="flex-grow flex flex-col md:flex-row gap-6">
+        <!-- Editor panel -->
+        <div class="flex-1 flex flex-col window rounded-lg shadow-xl overflow-hidden relative">
+            <div class="title-bar rounded-t-lg">
+                <div class="title-bar-text">Editor</div>
+                <div class="title-bar-controls">
+                    <div class="control-button bg-yellow-400"></div>
+                    <div class="control-button bg-green-400"></div>
+                    <div class="control-button bg-red-400"></div>
+                </div>
+            </div>
+            <textarea id="code-editor" spellcheck="false" class="flex-grow p-4 font-mono text-sm bg-gray-800 text-white resize-none outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200 rounded-b-lg" placeholder="<!-- Welcome, A/L Student! This editor is a great tool for your studies. -->
+<!-- You can use it to practice HTML, CSS, and JavaScript. -->
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>A/L Web Project</title>
+    <style>
+        /* Let's define some basic CSS for our elements */
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .main-heading {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        .my-button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #message {
+            margin-top: 1rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <h1 class='main-heading'>My First Responsive Page</h1>
+        <p>Welcome to your project space! You can start writing your code here and see it update instantly in the preview panel.</p>
+        <p>This is a paragraph with a <strong>strong</strong> tag. Try adding a new paragraph below or a list.</p>
+
+        <button class='my-button' id='demo-button'>Click Me!</button>
+        <p id='message'></p>
+    </div>
+
+    <script>
+        // This is a basic JavaScript function.
+        // It will run when the button above is clicked.
+        const messageElement = document.getElementById('message');
+        document.getElementById('demo-button').addEventListener('click', () => {
+            messageElement.textContent = 'Button was clicked! You can write any JS code here.';
+        });
+    </script>
+</body>
+</html>"></textarea>
+
+            <!-- Auto-suggest box -->
+            <div id="suggestions-box" class="absolute z-10 w-64 bg-gray-800 border border-gray-700 rounded-md shadow-lg p-2 top-0 left-0 hidden suggestions"></div>
+        </div>
+
+        <!-- Preview panel -->
+        <div class="flex-1 flex flex-col window rounded-lg shadow-xl overflow-hidden">
+            <div class="title-bar rounded-t-lg">
+                <div class="title-bar-text">Preview</div>
+                <div class="title-bar-controls">
+                    <div class="control-button bg-yellow-400"></div>
+                    <div class="control-button bg-green-400"></div>
+                    <div class="control-button bg-red-400"></div>
+                </div>
+            </div>
+            <iframe id="live-preview" class="flex-grow rounded-b-lg"></iframe>
+        </div>
+    </main>
+
+    <!-- Controls at the bottom -->
+    <div class="mt-6 flex justify-center gap-4">
+        <button id="format-button" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-50">
+            Format Code
+        </button>
+        <button id="clear-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50">
+            Clear
+        </button>
+    </div>
+
+    <!-- Message box for potential errors or notifications -->
+    <div id="message-box" class="message-box fixed top-4 right-4 bg-gray-900 text-white text-sm p-4 rounded-lg shadow-lg"></div>
+    
+    <!-- Load the js-beautify library for code formatting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.0/beautify-html.min.js"></script>
+
+    <script>
+        // Get references to all the important DOM elements
+        const editor = document.getElementById('code-editor');
+        const preview = document.getElementById('live-preview');
+        const formatButton = document.getElementById('format-button');
+        const clearButton = document.getElementById('clear-button');
+        const messageBox = document.getElementById('message-box');
+        const suggestionsBox = document.getElementById('suggestions-box');
+
+        // A list of common HTML tags for auto-suggestion
+        const htmlTags = ['a', 'abbr', 'address', 'area', 'article', 'aside', 'audio', 'b', 'base', 'bdi', 'bdo', 'blockquote', 'body', 'br', 'button', 'canvas', 'caption', 'cite', 'code', 'col', 'colgroup', 'data', 'datalist', 'dd', 'del', 'details', 'dfn', 'dialog', 'div', 'dl', 'dt', 'em', 'embed', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hr', 'html', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'label', 'legend', 'li', 'link', 'main', 'map', 'mark', 'meta', 'meter', 'nav', 'noscript', 'object', 'ol', 'optgroup', 'option', 'output', 'p', 'param', 'picture', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'script', 'section', 'select', 'small', 'source', 'span', 'strong', 'style', 'sub', 'summary', 'sup', 'svg', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'track', 'u', 'ul', 'var', 'video', 'wbr'];
+
+        // Function to show a temporary message
+        function showMessage(msg) {
+            messageBox.textContent = msg;
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 3000);
+        }
+
+        // Function to run the code
+        function runCode() {
+            try {
+                // Get the code from the editor
+                const code = editor.value;
+                // Write the code to the iframe's document
+                const iframeDocument = preview.contentDocument;
+                iframeDocument.open();
+                iframeDocument.write(code);
+                iframeDocument.close();
+            } catch (error) {
+                // Show an error message if something goes wrong
+                console.error("Failed to render code:", error);
+                showMessage("An error occurred while rendering the code.");
+            }
+        }
+
+        // Function to format the code
+        function formatCode() {
+            try {
+                // Get the code from the editor
+                const code = editor.value;
+                // Use the js-beautify library to format the HTML
+                const formattedCode = window.html_beautify(code, { indent_size: 2, space_in_empty_paren: true });
+                // Update the editor with the formatted code
+                editor.value = formattedCode;
+                // Run the code to update the live preview
+                runCode();
+                showMessage("Code formatted successfully!");
+            } catch (error) {
+                console.error("Failed to format code:", error);
+                showMessage("An error occurred while formatting the code.");
+            }
+        }
+
+        // Function to clear the editor and preview
+        function clearContent() {
+            editor.value = '';
+            preview.srcdoc = ''; // Clear the iframe content
+            showMessage("Content cleared!");
+        }
+
+        // Function to get the cursor position
+        function getCursorPosition(textarea) {
+            return textarea.selectionEnd;
+        }
+
+        // Function to show auto-suggestions
+        function showSuggestions() {
+            const cursorPosition = getCursorPosition(editor);
+            const textBeforeCursor = editor.value.substring(0, cursorPosition);
+            const match = textBeforeCursor.match(/<([a-zA-Z]*)$/);
+
+            // Hide the suggestions box if there's no match
+            if (!match) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            const prefix = match[1];
+            const filteredTags = htmlTags.filter(tag => tag.startsWith(prefix));
+
+            // Populate the suggestions box
+            suggestionsBox.innerHTML = '';
+            if (filteredTags.length > 0) {
+                // Calculate the position of the suggestions box
+                const editorRect = editor.getBoundingClientRect();
+                const selectionStart = editor.selectionStart;
+                const textBefore = editor.value.substring(0, selectionStart);
+                const lines = textBefore.split('\n');
+                const lastLine = lines[lines.length - 1];
+                const charWidth = 7; // Approximate width of a monospaced character
+                const lineHeight = 1.5 * 16; // Assumes font-size: 16px and line-height: 1.5
+                const x = lastLine.length * charWidth + 10;
+                const y = (lines.length - 1) * lineHeight + 10;
+
+                suggestionsBox.style.left = `${x}px`;
+                suggestionsBox.style.top = `${y}px`;
+                suggestionsBox.style.display = 'block';
+
+                filteredTags.forEach(tag => {
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.className = 'p-2 text-gray-200 text-sm suggestion-item';
+                    suggestionItem.textContent = `<${tag}>`;
+                    suggestionItem.addEventListener('mousedown', (e) => {
+                        // Prevent the textarea from losing focus
+                        e.preventDefault();
+                        insertSuggestion(tag);
+                    });
+                    suggestionsBox.appendChild(suggestionItem);
+                });
+            } else {
+                suggestionsBox.style.display = 'none';
+            }
+        }
+
+        // Function to insert a selected suggestion into the editor
+        function insertSuggestion(tag) {
+            const cursorPosition = getCursorPosition(editor);
+            const textBeforeCursor = editor.value.substring(0, cursorPosition);
+            const textAfterCursor = editor.value.substring(cursorPosition);
+            const match = textBeforeCursor.match(/<([a-zA-Z]*)$/);
+
+            if (match) {
+                const startOfTagIndex = textBeforeCursor.lastIndexOf('<');
+                editor.value = textBeforeCursor.substring(0, startOfTagIndex) + `<${tag}></${tag}>` + textAfterCursor;
+                // Place the cursor in the middle of the new tag
+                const newCursorPosition = startOfTagIndex + tag.length + 3;
+                editor.setSelectionRange(newCursorPosition, newCursorPosition);
+            }
+            suggestionsBox.style.display = 'none';
+        }
+
+        // Event listener for the "Format Code" button
+        formatButton.addEventListener('click', formatCode);
+        // Event listener for the "Clear" button
+        clearButton.addEventListener('click', clearContent);
+
+        // Listen for input events on the editor to show suggestions and run code
+        editor.addEventListener('input', () => {
+            showSuggestions();
+            runCode();
+        });
+
+        // Handle keydown for navigation
+        editor.addEventListener('keydown', (e) => {
+            if (suggestionsBox.style.display === 'block') {
+                const items = suggestionsBox.querySelectorAll('.suggestion-item');
+                let activeItem = suggestionsBox.querySelector('.active-suggestion');
+                let activeIndex = Array.from(items).indexOf(activeItem);
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (activeItem) activeItem.classList.remove('active-suggestion');
+                    activeIndex = (activeIndex + 1) % items.length;
+                    items[activeIndex].classList.add('active-suggestion');
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (activeItem) activeItem.classList.remove('active-suggestion');
+                    activeIndex = (activeIndex - 1 + items.length) % items.length;
+                    items[activeIndex].classList.add('active-suggestion');
+                } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    if (activeItem) {
+                        e.preventDefault();
+                        const tag = activeItem.textContent.replace(/[<>]/g, '');
+                        insertSuggestion(tag);
+                    }
+                }
+            }
+        });
+
+        // Run the code once on page load with the default content
+        window.onload = runCode;
+    </script>
+</body>
+</html>
